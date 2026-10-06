@@ -1,0 +1,20 @@
+# data & caches
+pred_cache/
+pred_cache2/
+adaptive/
+novel_arms/
+semisup_em/
+__pycache__/
+*.npz
+*.npy
+*.log
+*.json
+!*.json.tmp
+
+# data dirs
+xdomain_data/
+*.csv
+
+# OS / IDE
+.DS_Store
+Thumbs.db
