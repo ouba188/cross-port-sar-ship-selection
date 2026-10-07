@@ -4,15 +4,10 @@ adaptive/
 novel_arms/
 semisup_em/
 __pycache__/
-*.npz
 *.npy
 *.log
 *.json
 !*.json.tmp
-!pred_cache/
-!pred_cache/*.npz
-!f0921/
-!f0921/*.npz
 
 # data dirs
 xdomain_data/
