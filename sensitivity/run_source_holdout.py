@@ -165,7 +165,9 @@ def run(smoke=False):
                 continue
             ps_pos = spos[ports_all[spos] != pp]       # 伪源（22 港）
             pt_pos = spos[ports_all[spos] == pp]       # 伪目标样本
-            if len(pt_pos) < 8:
+            # 必须留出非空 eval：标注数 annot < 样本数（否则 eval 空 → NaN）
+            annot = min(ANNOT, len(pt_pos))
+            if annot >= len(pt_pos) - 1:
                 continue
             # 伪源 fit_source
             ps_n = min(len(pt_pos), len(ps_pos))
@@ -182,7 +184,7 @@ def run(smoke=False):
             pt_D = (pt_bq != pt_eq)
             # 逐 seed
             for seed in INNER_SEEDS:
-                ann = np.random.default_rng(seed).choice(len(pt_pos), min(ANNOT, len(pt_pos)), replace=False)
+                ann = np.random.default_rng(seed).choice(len(pt_pos), annot, replace=False)
                 ay = pt_y[ann]
                 in_ann = np.zeros(len(pt_pos), bool); in_ann[ann] = True
                 ev = ~in_ann
@@ -202,20 +204,22 @@ def run(smoke=False):
                         continue
                     for k in KAPPAS:
                         ba = shared_gate_ba(smp, W, f_T, obs_cls, obs_mean, n_c, psi_inv, df, sf, query_pt, pt_bq, pt_eq, pt_D, pt_y, ev, k)
-                        inner_scores[(r, k)].append(ba)
+                        if np.isfinite(ba):
+                            inner_scores[(r, k)].append(ba)
 
-        # 选 (r*, k*)
-        best = None; best_score = -np.inf
-        for (r, k), vals in inner_scores.items():
-            s = np.mean(vals) if vals else -np.inf
-            if s > best_score:
-                best_score = s; best = (r, k)
-        r_star, k_star = best if best else (2, 8.0)
+        # 选 (r*, k*)：只用有限分数；无有效候选 → 报错（不回退）
+        valid = {k: v for k, v in inner_scores.items() if v}
+        if not valid:
+            raise RuntimeError(f'{p}: 内层无有效分数（所有候选 eval 空或 NaN），无法选参')
+        best = max(valid, key=lambda k: np.mean(valid[k]))
+        r_star, k_star = best
 
         # 外层最终评估（5 seed）
         delta_cp_full = delta_from(z_src, y_ids[source_pos], ports_all[source_pos], sm['means'])
         W_full = fit_factor_als(delta_cp_full, r_star)
-        row = {'port': p, 'r_star': r_star, 'k_star': k_star, 'fus': [], 's2': [], 'shared': [], 'fixed28': []}
+        row = {'port': p, 'r_star': r_star, 'k_star': k_star, 'fus': [], 's2': [], 'shared': [], 'fixed28': [],
+               'inner_n': {f'{r},{k}': len(inner_scores[(r, k)]) for (r, k) in inner_scores},
+               'inner_mean': {f'{r},{k}': (float(np.mean(inner_scores[(r, k)])) if inner_scores[(r, k)] else None) for (r, k) in inner_scores}}
         for seed in OUTER_SEEDS:
             ann = np.random.default_rng(seed).choice(qpos, ANNOT, replace=False)
             ay = y_ids[ann]
