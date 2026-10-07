@@ -1,5 +1,4 @@
 # data & caches
-pred_cache/
 pred_cache2/
 adaptive/
 novel_arms/
@@ -10,6 +9,10 @@ __pycache__/
 *.log
 *.json
 !*.json.tmp
+!pred_cache/
+!pred_cache/*.npz
+!f0921/
+!f0921/*.npz
 
 # data dirs
 xdomain_data/
