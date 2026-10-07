@@ -75,8 +75,14 @@ paper/                    正文活源（方法节 + 总表 + 相关工作底稿
 
 ## 待办（定稿前）
 
-1. 统一评估口径（query\ann）重跑双向 s2 + oracle，与其余臂同表（现有多处口径不一致）。
-2. 补 EN 方法节；写实验节把因果链逐条落地。
+详见 `paper/EXTERNAL_REVIEW_20261006.md`（外部评审复核，6 条行动项）。核心：
+
+1. 补 64 标签多 seed 稳定性（≥5 seeds）+ paired significance（Wilcoxon + bootstrap CI），s2 vs fusion。
+2. 统一评估口径（query\ann）重跑双向 s2 + oracle，与其余臂同表。
+3. 补 G_s2(α) 剂量-响应（或改方法节 G 定义为 G_oracle）。
+4. 核实并披露两处泄漏：e206 SSL 是否接触目标、同船是否跨 source/target。
+5. 外部 SAR 泛化：OpenSARShip 公开 1.0 / FUSAR-Ship 复跑真链键迁移。
+6. 补 EN 方法节；写实验节把因果链逐条落地。
 
 ## 环境
 
